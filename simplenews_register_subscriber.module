@@ -1,0 +1,52 @@
+<?php
+// $Id: simplenews_register_subscriber.module 183 2010-09-20 20:07:57Z brockboland $
+
+/**
+ * @file
+ * Simplenews Subscriber Registration Action
+ *
+ * Adds an action that will create a user record, available when subscribing someone to a newsletter.
+ */
+
+/**
+ * Implementation of hook_action_info().
+ */
+function simplenews_register_subscriber_action_info() {
+  return array(
+    'simplenews_register_subscriber_action' => array(
+      'description' => t('Register subscriber as a new user'),
+      'type' => 'simplenews',
+      'configurable' => FALSE,
+      'hooks' => array(
+        'simplenews' => array('subscribe'),
+      ),
+    )
+  );
+}
+
+
+/**
+ * Action. Create a user record if one doesn't exist, then update the
+ * simplenews_subscriptions table with the new uid.
+ */
+function simplenews_register_subscriber_action(&$object, $context = array()) {
+  $account = $context['account'];
+  // Only proceed if there is an email address and no uid
+  if($account->mail && ($account->uid == 0 || !$account->uid)) {
+    // Unset the uid field to make sure a new record is created
+    unset($account->uid);
+    // Put account details into an array - seems user_save() needs them in the
+    // array and not in the object for an insert
+    $account_details = array(
+      'name' => $account->mail,
+      'mail' => $account->mail
+    );
+    // Save the user object
+    $new_account = user_save($account, $account_details);
+    
+    // If the save was successfull, update the subscription table with the new uid
+    if($new_account->uid > 0) {
+      db_query("UPDATE {simplenews_subscriptions} SET uid = %d WHERE mail = '%s'", $new_account->uid, $account->mail);
+    }
+  }
+}

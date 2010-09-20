@@ -1,0 +1,12 @@
+; $Id: simplenews_register_subscriber.info 183 2010-09-20 20:07:57Z brockboland $
+name = Simplenews Subscriber Registration Action
+description = "Adds an action that will create a user record, available when subscribing someone to a newsletter."
+
+; Core version (required)
+core = 6.x
+
+; Package name (see http://drupal.org/node/101009 for a list of names)
+package = Mail
+
+; Module dependencies
+dependencies[] = simplenews_action
